@@ -2,37 +2,126 @@ from email import message
 from tkinter import *
 from tkinter import messagebox
 #import RPi.GPIO as GPIO    
-from time import sleep
+from time import sleep, time
 
 def forward():
-    #GPIO.output(8, GPIO.HIGH) # Turn on
-    a=0
-    messagebox.showinfo("", "hello")
-
+    moveForward(0)
 
 def reverse():
-    #GPIO.output(8, GPIO.LOW) # Turn off
-    b=0
+    moveBackward(0)
 
 def fastforward():
-    #GPIO.output(8, GPIO.HIGH) # Turn on
-    a=0
-    messagebox.showinfo("", "hello")
+    moveForward(1)
 
 
 def fastreverse():
-    #GPIO.output(8, GPIO.LOW) # Turn off
-    b=0
+    moveBackward(1)
 
 
 
-# GPIO initi
-#GPIO.setwarnings(False)  
-#GPIO.setmode(GPIO.BOARD)   # Use physical pin numbering
-#GPIO.setup(8, GPIO.OUT, initial=GPIO.LOW) 
-#GPIO.setup(8, GPIO.OUT, initial=GPIO.LOW) 
-#GPIO.setup(8, GPIO.OUT, initial=GPIO.LOW) 
-#GPIO.setup(8, GPIO.OUT, initial=GPIO.LOW) 
+def moveForward(fast):
+
+    global nbTurns1
+    global delay
+    global STEPPER1_PIN_1
+    global STEPPER1_PIN_2
+    global STEPPER1_PIN_3
+    global STEPPER1_PIN_4
+
+    nbTurns = nbTurns1
+    
+    if fast == 1:
+      nbTurns = nbTurns * 3
+    
+    # nombre de pas
+    step_number = 0
+
+    while step_number < (nbTurns * 4) :
+        moveCoilForward(step_number%4)
+        step_number = step_number + 1
+        time.sleep(delay)
+    
+
+    GPIO.output(STEPPER1_PIN_1, GPIO.LOW)
+    GPIO.output(STEPPER1_PIN_2, GPIO.LOW)
+    GPIO.output(STEPPER1_PIN_3, GPIO.LOW)
+    GPIO.output(STEPPER1_PIN_4, GPIO.LOW)
+
+
+def moveBackward(fast):
+
+    global nbTurns1
+    global delay
+    global STEPPER1_PIN_1
+    global STEPPER1_PIN_2
+    global STEPPER1_PIN_3
+    global STEPPER1_PIN_4
+
+    nbTurns = nbTurns1
+    
+    if fast == 1:
+      nbTurns = nbTurns * 3
+    
+    # nombre de pas
+    step_number = 0
+
+    while step_number < (nbTurns * 4) :
+        moveCoilBackward(step_number%4)
+        step_number = step_number + 1
+        time.sleep(delay)
+    
+    GPIO.output(STEPPER1_PIN_1, GPIO.LOW)
+    GPIO.output(STEPPER1_PIN_2, GPIO.LOW)
+    GPIO.output(STEPPER1_PIN_3, GPIO.LOW)
+    GPIO.output(STEPPER1_PIN_4, GPIO.LOW)
+
+
+def moveCoilForward(coil_number) :
+    if coil_number == 0:
+        GPIO.output(STEPPER1_PIN_1, GPIO.HIGH)
+        GPIO.output(STEPPER1_PIN_2, GPIO.LOW)
+        GPIO.output(STEPPER1_PIN_3, GPIO.LOW)
+        GPIO.output(STEPPER1_PIN_4, GPIO.LOW)
+    elif coil_number == 1:
+        GPIO.output(STEPPER1_PIN_1, GPIO.LOW)
+        GPIO.output(STEPPER1_PIN_2, GPIO.HIGH)
+        GPIO.output(STEPPER1_PIN_3, GPIO.LOW)
+        GPIO.output(STEPPER1_PIN_4, GPIO.LOW)
+    elif coil_number == 1:
+        GPIO.output(STEPPER1_PIN_1, GPIO.LOW)
+        GPIO.output(STEPPER1_PIN_2, GPIO.LOW)
+        GPIO.output(STEPPER1_PIN_3, GPIO.HIGH)
+        GPIO.output(STEPPER1_PIN_4, GPIO.LOW)
+    elif coil_number == 1:
+        GPIO.output(STEPPER1_PIN_1, GPIO.LOW)
+        GPIO.output(STEPPER1_PIN_2, GPIO.LOW)
+        GPIO.output(STEPPER1_PIN_3, GPIO.LOW)
+        GPIO.output(STEPPER1_PIN_4, GPIO.HIGH)
+        
+  
+def moveCoilBackward(coil_number) :
+    if coil_number == 0:
+        GPIO.output(STEPPER1_PIN_1, GPIO.LOW)
+        GPIO.output(STEPPER1_PIN_2, GPIO.LOW)
+        GPIO.output(STEPPER1_PIN_3, GPIO.LOW)
+        GPIO.output(STEPPER1_PIN_4, GPIO.HIGH)
+    elif coil_number == 1:
+        GPIO.output(STEPPER1_PIN_1, GPIO.LOW)
+        GPIO.output(STEPPER1_PIN_2, GPIO.LOW)
+        GPIO.output(STEPPER1_PIN_3, GPIO.HIGH)
+        GPIO.output(STEPPER1_PIN_4, GPIO.LOW)
+    elif coil_number == 1:
+        GPIO.output(STEPPER1_PIN_1, GPIO.LOW)
+        GPIO.output(STEPPER1_PIN_2, GPIO.HIGH)
+        GPIO.output(STEPPER1_PIN_3, GPIO.LOW)
+        GPIO.output(STEPPER1_PIN_4, GPIO.LOW)
+    elif coil_number == 1:
+        GPIO.output(STEPPER1_PIN_1, GPIO.HIGH)
+        GPIO.output(STEPPER1_PIN_2, GPIO.LOW)
+        GPIO.output(STEPPER1_PIN_3, GPIO.LOW)
+        GPIO.output(STEPPER1_PIN_4, GPIO.LOW)
+
+
 
 # init form
 root = Tk()
@@ -42,12 +131,20 @@ root.resizable(width=0, height=0)
 
 #variables
 delay = StringVar(root, value="1")    # delay between activation of each coil
-nbTurns = StringVar(root, value="100")  # autostepping
+nbTurns1 = StringVar(root, value="100")  # autostepping
 position = StringVar(root, value="0") # position of motor
-st_p1 = 35    # pin 1 of motor
-st_p2 = 36
-st_p3 = 37
-st_p4 = 38
+STEPPER1_PIN_1 = 35    # pin 1 of motor
+STEPPER1_PIN_2 = 36
+STEPPER1_PIN_3 = 37
+STEPPER1_PIN_4 = 38
+
+# GPIO initi
+GPIO.setwarnings(False)  
+GPIO.setmode(GPIO.BOARD)   # Use physical pin numbering
+GPIO.setup(STEPPER1_PIN_1, GPIO.OUT, initial=GPIO.LOW) 
+GPIO.setup(STEPPER1_PIN_2, GPIO.OUT, initial=GPIO.LOW) 
+GPIO.setup(STEPPER1_PIN_3, GPIO.OUT, initial=GPIO.LOW) 
+GPIO.setup(STEPPER1_PIN_4, GPIO.OUT, initial=GPIO.LOW) 
 
 # Ligne 1 : Delay (def:2)
 Label(root, text="Delay", width=20).grid(row=0, sticky=W) 
